@@ -1,0 +1,24 @@
+{
+  "name": "datav-libs",
+  "version": "1.0.0",
+  "description": "datav components library",
+  "main": "index.js",
+  "scripts": {
+    "dev": "rollup -wc rollup.config.dev.js",
+    "build": "rollup -c rollup.config.dev.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "friendlyjesse",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "rollup": "^2.33.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  },
+  "dependencies": {
+    "sam-test-data": "0.0.5"
+  }
+}

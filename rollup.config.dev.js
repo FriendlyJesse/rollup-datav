@@ -1,12 +1,14 @@
-const path = require('path')
-const resolve = require('rollup-plugin-node-resolve')
-const commonjs = require('rollup-plugin-commonjs')
+import path from 'path'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import babel from '@rollup/plugin-babel'
+import json from '@rollup/plugin-json'
 
 const inputPath = path.resolve(__dirname, './src/index.js')
 const outputUMDPath = path.resolve(__dirname, './dist/datav.umd.js')
 const outputESPath = path.resolve(__dirname, './dist/datav.es.js')
 
-module.exports = {
+export default {
   input: inputPath,
   output: [
     {
@@ -23,7 +25,11 @@ module.exports = {
   ],
   plugins: [
     resolve(), // 将依赖混合打包
-    commonjs() // 识别 common 模块
+    commonjs(), // 识别 common 模块
+    babel({
+      exclude: 'node_modules/**' // only transpile our source code
+    }),
+    json() // 编译后识别 json
   ],
   external: [ // 将依赖依旧作为依赖，而不打包进来
     'sam-test-data'

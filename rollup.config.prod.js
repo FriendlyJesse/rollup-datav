@@ -3,11 +3,11 @@ import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
-import terser from 'rollup-plugin-terser'
+import { terser } from 'rollup-plugin-terser'
 
 const inputPath = path.resolve(__dirname, './src/index.js')
-const outputUMDPath = path.resolve(__dirname, './dist/datav.umd.js')
-const outputESPath = path.resolve(__dirname, './dist/datav.es.js')
+const outputUMDPath = path.resolve(__dirname, './dist/datav.umd.min.js')
+const outputESPath = path.resolve(__dirname, './dist/datav.es.min.js')
 
 export default {
   input: inputPath,

@@ -1,13 +1,14 @@
 <template>
-  <div class="test">{{message}}</div>
+  <div class="test">
+    {{message}}
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'TestComponent',
+  name: 'TestComponent3',
   setup() {
-    const message = 'hello world!'
-
+    const message = 'hello world3!'
     return {
       message
     }
@@ -17,6 +18,6 @@ export default {
 
 <style lang="scss" scoped>
 .test {
-  color: red
+  color: green
 }
 </style>

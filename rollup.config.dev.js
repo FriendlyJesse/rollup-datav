@@ -17,12 +17,18 @@ export default {
       name: 'datav', // //当 format 为 iife 和 umd 时必须提供，将作为全局变量挂在window(浏览器环境)下：window.A=...
       file: outputUMDPath, // 输出路径
       format: 'umd', // 五种输出格式：amd /  es6 / iife / umd / cjs
+      globals: {
+        vue: 'vue'
+      }
       // sourcemap: true  //生成 bundle.map.js 文件，方便调试
     },
     {
       name: 'datav',
       file: outputESPath,
-      format: 'es'
+      format: 'es',
+      globals: {
+        vue: 'vue'
+      }
     }
   ],
   plugins: [
@@ -39,6 +45,6 @@ export default {
     }) // 增加对 scss 的支持
   ],
   external: [ // 将依赖依旧作为依赖，而不打包进来
-    'sam-test-data'
+    'vue'
   ]
 }

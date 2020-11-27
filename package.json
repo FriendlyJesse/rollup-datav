@@ -5,8 +5,9 @@
   "main": "dist/datav.es.js",
   "scripts": {
     "dev": "rollup -wc rollup.config.dev.js",
-    "build": "npm run lint && rollup -c rollup.config.dev.js",
-    "build:prod": "npm run lint && rollup -c rollup.config.prod.js",
+    "build": "npm run lint && npm run clean && rollup -c rollup.config.dev.js",
+    "build:prod": "npm run lint && npm run clean && rollup -c rollup.config.prod.js",
+    "clean": "rm -rf ./dist/",
     "lint": "eslint ./src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-syntax-jsx": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^16.0.0",

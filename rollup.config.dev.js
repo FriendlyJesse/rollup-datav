@@ -38,7 +38,12 @@ export default {
     resolve(), // 将依赖混合打包
     commonjs(), // 识别 common 模块
     babel({
-      babelHelpers: 'bundled',
+      plugins: [
+        ['@babel/plugin-transform-runtime', {
+          regenerator: true
+        }]
+      ],
+      babelHelpers: 'runtime',
       exclude: 'node_modules/**' // only transpile our source code
     }),
     json(), // 编译后识别 json

@@ -18,7 +18,8 @@ export default {
       file: outputUMDPath, // 输出路径
       format: 'umd', // 五种输出格式：amd /  es6 / iife / umd / cjs
       globals: {
-        vue: 'vue'
+        vue: 'vue',
+        crypto: 'crypto'
       }
       // sourcemap: true  //生成 bundle.map.js 文件，方便调试
     },
@@ -27,7 +28,8 @@ export default {
       file: outputESPath,
       format: 'es',
       globals: {
-        vue: 'vue'
+        vue: 'vue',
+        crypto: 'crypto'
       }
     }
   ],
@@ -45,6 +47,7 @@ export default {
     }) // 增加对 scss 的支持
   ],
   external: [ // 将依赖依旧作为依赖，而不打包进来
-    'vue'
+    'vue',
+    'crypto'
   ]
 }

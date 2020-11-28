@@ -28,14 +28,13 @@ export default {
         const dom = context.$refs[refName]
         dom && (chart = Echarts.init(dom, ctx.theme))
       }
-      console.log(ctx.options)
-      chart.setOption(ctx.options)
+      if (ctx.options) {
+        chart.setOption(ctx.options)
+      }
     }
 
     watch(() => ctx.options, () => {
-      if (!chart) {
-        initChart()
-      }
+      initChart()
     })
 
     onMounted(() => {

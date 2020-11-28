@@ -100,12 +100,15 @@ export default {
 
 <style lang="scss" scoped>
 .loading {
-  position: relative;
-  .loading__content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  /* .loading__content {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
+  } */
 }
 </style>

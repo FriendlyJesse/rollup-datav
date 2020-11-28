@@ -20,7 +20,8 @@ export default {
       format: 'umd', // 五种输出格式：amd /  es6 / iife / umd / cjs
       globals: {
         vue: 'vue',
-        crypto: 'crypto'
+        crypto: 'crypto',
+        echarts: 'echarts'
       }
       // sourcemap: true  //生成 bundle.map.js 文件，方便调试
     },
@@ -30,7 +31,8 @@ export default {
       format: 'es',
       globals: {
         vue: 'vue',
-        crypto: 'crypto'
+        crypto: 'crypto',
+        echarts: 'echarts'
       }
     }
   ],
@@ -55,6 +57,7 @@ export default {
   ],
   external: [ // 将依赖依旧作为依赖，而不打包进来
     'vue',
-    'crypto'
+    'crypto',
+    'echarts'
   ]
 }

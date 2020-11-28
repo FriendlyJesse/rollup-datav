@@ -35,7 +35,6 @@ export default {
       updateScale()
 
       resizeChange = debounce(async (e) => {
-        console.log(e)
         await initSize()
         updateSize()
         updateScale()
@@ -92,7 +91,7 @@ export default {
       // 缩放比
       const widthScale = currentWidth / realWidth
       const heightScale = currentHeight / realHeight
-      dom.style.transform = `scale(${widthScale}, ${heightScale})`
+      dom && (dom.style.transform = `scale(${widthScale}, ${heightScale})`)
     }
 
     const initMutationObserver = () => { // 在外部组件修改 dom 属性时触发

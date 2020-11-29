@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "eslint": "^6.7.2",
+    "lodash": "^4.17.20",
     "uuid": "^8.3.1"
   }
 }

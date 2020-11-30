@@ -1,10 +1,10 @@
 <template>
-  <div class="scroll-list" :ref="refName">
+  <div class="scroll-list" :id="id">
     <div 
       class="scroll-list__header" 
       :style="style"
     >
-      <div 
+      <div
         class="scroll-list__header-item scroll-list-text" 
         v-for="(headerItem, i) in headerData" 
         :key="headerItem + i"
@@ -18,36 +18,45 @@
         v-html="headerItem"
       />
     </div>
-    <div 
-      class="scroll-list__rows"
-      v-for="(rowData, rowIndex) in rowsData" 
-      :key="rowIndex"
+    <div class="scroll-list__rows-wrapper"
       :style="{
-        height: `${rowHeights[rowIndex]}px`,
-        backgroundColor: rowIndex % 2 === 0 ? rowBg[1] : rowBg[0]
+        height: `${wrapperHeight - actualConfig.headerHeight}px`
       }"
     >
-      <div class="scroll-list__columns"
-        v-for="(columnData, columnIndex) in rowData"
-        :key="columnData + columnIndex"
+      <div 
+        class="scroll-list__rows"
+        v-for="(rowData, index) in currentRowsData" 
+        :key="rowData.rowIndex"
         :style="{
-          width: `${columnWidths[columnIndex]}px`,
-          textAlign: aligns[columnIndex],
-          fontSize: `${actualConfig.rowFontSize}px`,
-          color: actualConfig.rowColor,
-          ...rowStyle[columnIndex]
+          height: `${rowHeights[index]}px`,
+          lineHeight: `${rowHeights[index]}px`,
+          backgroundColor: rowData.rowIndex % 2 === 0 ? rowBg[1] : rowBg[0]
         }"
-        v-html="columnData"
-      />
+      >
+        <!-- 使用 scroll-list-text 使得元素不能换行 -->
+        <div class="scroll-list__columns scroll-list-text"
+          v-for="(columnData, columnIndex) in rowData.data"
+          :key="columnData + columnIndex"
+          :style="{
+            width: `${columnWidths[columnIndex]}px`,
+            textAlign: aligns[columnIndex],
+            fontSize: `${actualConfig.rowFontSize}px`,
+            color: actualConfig.rowColor,
+            ...rowStyle[columnIndex]
+          }"
+          v-html="columnData"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, watch } from 'vue'
 import useScreen from '../../hooks/useScreen'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
+import { v4 as uuidv4 } from 'uuid'
 
 const defaultConfig = {
   headerData: [],
@@ -61,11 +70,13 @@ const defaultConfig = {
   },
   headerFontSize: 28,
   headerColor: 'white',
-  rowStyle: {},
+  rowStyle: [],
   rowIndexStyle: {
     width: '50px'
   },
   rowNum: 10,
+  moveNum: 1, // 移动间隔
+  duration: 2000, // 动画延迟时间
   rowBg: [],
   rowFontSize: 28,
   rowColor: 'black',
@@ -95,7 +106,8 @@ export default {
     }
   },
   setup (ctx) {
-    const refName = 'scrollList'
+    const id = `base-scroll-list-${uuidv4()}`
+    const { width, height } = useScreen(id)
     const { config } = ctx
     const style = {
       background: config.headerBg,
@@ -107,10 +119,15 @@ export default {
     const rowStyle = ref([])
     const columnWidths = ref([])
     const rowsData = ref([])
+    const currentRowsData = ref([])
+    const currentIndex = ref(0) // 动画指针
     const rowHeights = ref([])
     const rowNum = ref(defaultConfig.rowNum)
     const rowBg = ref([])
     const aligns = ref([])
+    const wrapperHeight = ref(0)
+    let avgHeight = 0
+    const isAnimationStart = ref(true)
 
     const handleHeader = (config, width, height) => {
       const _headerData = cloneDeep(config.headerData)
@@ -125,7 +142,11 @@ export default {
         _headerStyle.unshift(config.headerIndexStyle)
         _rowStyle.unshift(config.rowIndexStyle)
         _rowsData.map((row, index) => {
-          row.unshift(index + 1)
+          if (config.headerIndexData && config.headerIndexData.length > 0 && config.headerIndexData[index]) {
+            row.unshift(config.headerIndexData[index])
+          } else {
+            row.unshift(index + 1)
+          }
         })
         _aligns.unshift('center')
       }
@@ -156,10 +177,18 @@ export default {
       columnWidths.value = _columnWidths
       headerData.value = _headerData
       headerStyle.value = _headerStyle
-      rowsData.value = _rowsData
       rowStyle.value = _rowStyle
       aligns.value = _aligns
+
+      const { rowNum } = config
+      if (_rowsData.length >= rowNum && _rowsData.length < rowNum * 2) {
+        const newRowData = [..._rowsData, ..._rowsData]
+        rowsData.value = newRowData.map((item, index) => ({data: item, rowIndex: index}))
+      } else {
+        rowsData.value = _rowsData.map((item, index) => ({data: item, rowIndex: index}))
+      }
     }
+
     const handleRows = (config, height) => {
       const { headerHeight } = config
       const unuseHeight = height.value - headerHeight
@@ -167,7 +196,7 @@ export default {
       if (rowNum.value > rowsData.value.length) {
         rowNum.value = rowsData.value.length
       }
-      const avgHeight = unuseHeight / rowNum.value
+      avgHeight = unuseHeight / rowNum.value
       rowHeights.value = new Array(rowNum.value).fill(avgHeight)
 
       // 行背景色
@@ -176,20 +205,68 @@ export default {
       }
     }
 
-    onMounted(() => {
-      const instance = getCurrentInstance()
-      const dom = instance.ctx.$refs[refName]
-      const { width, height } = useScreen(dom)
-      const _actualConfig = assign(defaultConfig, config)
+    const startAnimation = async () => {
+      if (!isAnimationStart) return
+      const config = actualConfig.value
+      const { data, rowNum, moveNum, duration } = config
+      const totalLength = rowsData.value.length
+      if (totalLength < rowNum) return
+      const index = currentIndex.value
+      const _rowsData = cloneDeep(rowsData.value)
+      // 将数据重新头尾连接
+      const rows = _rowsData.slice(index)
+      rows.push(..._rowsData.slice(0, index))
+      currentRowsData.value = rows
+
+      // 将所有行的高度还原
+      rowHeights.value = new Array(totalLength).fill(avgHeight)
+
+      // 行高清空时间
+      const waitTime = 300
+      if (!isAnimationStart) return
+      await new Promise(resolve => setTimeout(resolve, waitTime))
+
+      // 将 moveNum 的行高度设置为0
+      rowHeights.value.splice(0, moveNum, ...new Array(moveNum).fill(0))
+
+      currentIndex.value += moveNum
+      // 是否到达最后一组数据
+      const Last = currentIndex.value - totalLength
+      if (Last >= 0) {
+        currentIndex.value = Last
+      }
+      // 延迟操作
+      if (!isAnimationStart) return
+      await new Promise(resolve => setTimeout(resolve, duration - waitTime))
+      if (!isAnimationStart) return
+      startAnimation()
+    }
+
+    const stopAnimation = () => {
+      isAnimationStart.value = false
+    }
+
+    const update = () => {
+      stopAnimation()
+      const _actualConfig = assign(defaultConfig, ctx.config)
+      wrapperHeight.value = height.value
       rowsData.value = _actualConfig.data || []
       handleHeader(_actualConfig, width, height)
       handleRows(_actualConfig, height)
       actualConfig.value = _actualConfig
+      // 启动动画
+      isAnimationStart.value = true
+      startAnimation()
+    }
+
+    watch(() => ctx.config, () => {
+      update()
     })
 
+
     return {
+      id,
       style,
-      refName,
       headerStyle,
       columnWidths,
       headerData,
@@ -198,7 +275,9 @@ export default {
       rowStyle,
       rowBg,
       aligns,
-      actualConfig
+      actualConfig,
+      currentRowsData,
+      wrapperHeight
     }
   }
 }
@@ -220,10 +299,15 @@ export default {
     align-items: center;
     font-size: 15px;
   }
-  .scroll-list__rows {
-    display: flex;
-    .scroll-list__columns {
-      font-size: 28px;
+  .scroll-list__rows-wrapper {
+    overflow: hidden;
+    .scroll-list__rows {
+      display: flex;
+      align-items: center;
+      transition: all 0.3s linear;
+      .scroll-list__columns {
+        height: 100%;
+      }
     }
   }
 }
